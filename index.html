@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" class="is-loading">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+
+    <!-- CSS của portfolio -->
+    <link rel="stylesheet" href="main.css" />
+    <!-- CSS của loader -->
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- Ghi đè nhỏ: đảm bảo loader phủ lên tất cả & chặn click đúng lúc -->
+    <style>
+      /* Ẩn nội dung đến khi loader xong */
+      .is-loading .container {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.6s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div class="loading-screen" aria-hidden="true">
+      <div class="loader">
+        <div class="loader-1 bar"></div>
+        <div class="loader-2 bar"></div>
+      </div>
+      <div class="counter">
+        <div class="counter-1 digit">
+          <div class="num">0</div>
+          <div class="num num1offset1">1</div>
+        </div>
+        <div class="counter-2 digit">
+          <div class="num">0</div>
+          <div class="num num1offset2">1</div>
+          <div class="num">2</div>
+          <div class="num">3</div>
+          <div class="num">4</div>
+          <div class="num">5</div>
+          <div class="num">6</div>
+          <div class="num">7</div>
+          <div class="num">8</div>
+          <div class="num">9</div>
+          <div class="num">0</div>
+        </div>
+        <div class="counter-3 digit"><!-- fill bằng JS --></div>
+      </div>
+    </div>
+    <!-- ===== /LOADING OVERLAY ===== -->
+
+    <div class="container">
+      <main>
+        <div class="content">
+          <img class="content__img" src="images/1.png" />
+          <img class="content__img" src="images/2.png" />
+          <img class="content__img" src="images/3.png" />
+          <img class="content__img" src="images/4.png" />
+          <img class="content__img" src="images/5.png" />
+          <img class="content__img" src="images/6.png" />
+          <img class="content__img" src="images/7.png" />
+          <img class="content__img" src="images/8.png" />
+          <img class="content__img" src="images/9.png" />
+          <img class="content__img" src="images/10.png" />
+        </div>
+      </main>
+
+      <!-- nav -->
+      <nav>
+        <div class="nav-logo">
+          <a href="index.html" class="nav-logo-link">
+            <img src="images/logo_black.png" alt="H Logo" class="nav-logo-img" />
+          </a>
+        </div>
+        <div class="nav-links">
+          <div class="nav-link"><a href="#">Contact</a></div>
+          <div class="nav-link"><a href="archive.html">Case Studies</a></div>
+          <div class="nav-link"><a href="about.html">About</a></div>
+        </div>
+      </nav>
+
+      <!-- header -->
+      <header>
+        <p id="name">Nguyen Viet Hoan</p>
+        <p>UX Designer & Developer</p>
+      </header>
+
+      <!-- footer -->
+      <footer>
+        <div class="footer-col">
+          <p>Current</p>
+          <p>Seoultech Uni</p>
+          <p> Visual Design Dept.</p>
+        </div>
+        <div class="footer-col">
+          <p>Previously</p>
+          <p>Seoil Uni</p>
+          <p>Communication Design Dept.</p>
+        </div>
+        <div class="footer-col">
+          <p>Gwangjin</p>
+          <p>SMC, Seoul</p>
+          <p>South Korea</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Thứ tự script BẮT BUỘC cho hover ảnh (GSAP v2 + imagesLoaded + logic hover) -->
+    <script src="js/TweenMax.min.js"></script>
+    <script src="js/imagesloaded.pkgd.min.js"></script>
+    <script src="js/script.js"></script>
+
+    <!-- Loader animation viết bằng GSAP v2 để không cần nạp thêm GSAP v3 -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Bổ sung cột số thứ 3
+        var c3 = document.querySelector(".counter-3");
+        for (var r = 0; r < 2; r++) {
+          for (var n = 0; n < 10; n++) {
+            var d = document.createElement("div");
+            d.className = "num";
+            d.textContent = n;
+            c3.appendChild(d);
+          }
+        }
+        var end = document.createElement("div");
+        end.className = "num";
+        end.textContent = "0";
+        c3.appendChild(end);
+
+        function animateCounter(counter, duration, delay) {
+          if (delay === void 0) delay = 0;
+          var numH = counter.querySelector(".num").clientHeight;
+          var total =
+            (counter.querySelectorAll(".num").length - 1) * numH;
+          TweenMax.to(counter, duration, {
+            y: -total,
+            delay: delay,
+            ease: Power2.easeInOut,
+          });
+        }
+
+        // Chạy counters
+        animateCounter(document.querySelector(".counter-3"), 5, 0);
+        animateCounter(document.querySelector(".counter-2"), 6, 0);
+        animateCounter(document.querySelector(".counter-1"), 2, 4);
+
+        // Timeline loader
+        var overlay = document.querySelector(".loading-screen");
+        var tl = new TimelineMax();
+
+        // Bars vẽ chiều rộng
+        tl.from(".loader-1", 6, { width: 0, ease: Power2.easeInOut }, 0);
+        tl.from(".loader-2", 2, { width: 0, ease: Power2.easeInOut }, 1.9);
+
+        // Nâng 3 cột số lên và biến mất (bắt đầu ở mốc 6s)
+        tl.staggerTo(
+          ".digit",
+          1,
+          { top: "-150px", ease: Power4.easeInOut },
+          0.1,
+          6
+        );
+
+        // Bỏ nền loader
+        tl.to(".loader", 0.1, { background: "none" }, 6);
+
+        // Rocale
+        tl.to(
+          ".loader-1",
+          0.5,
+          { rotation: 90, y: -50, ease: Power2.easeInOut },
+          6
+        );
+        tl.to(
+          ".loader-2",
+          0.5,
+          { x: -80, y: -20, ease: Power2.easeInOut },
+          6
+        );
+        // Scale up
+        tl.to(".loader", 1, { scale: 40, ease: Power2.easeInOut }, 7);
+        tl.to(
+          ".loader",
+          1,
+          { rotation: 45, y: 500, x: 2000, ease: Power2.easeInOut },
+          7
+        );
+
+        // overlay và reveal
+        tl.to(
+          ".loading-screen",
+          0.5,
+          {
+            autoAlpha: 0,
+            ease: Power1.easeInOut,
+            onStart: function () {
+              overlay.style.pointerEvents = "none";
+            },
+            onComplete: function () {
+              overlay.style.display = "none";
+              document.documentElement.classList.remove("is-loading");
+
+              // animate reveal
+              TweenMax.set(".container", { y: 80, autoAlpha: 0 });
+              TweenMax.to(".container", 2.8, {
+                y: 0,
+                autoAlpha: 1,
+                ease: Power4.easeOut,
+              });
+            },
+          },
+          7.5
+        );
+      });
+    </script>
+  </body>
+</html>

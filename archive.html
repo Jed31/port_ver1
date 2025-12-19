@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Case Studies</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- CSS chung -->
+    <link rel="stylesheet" href="main.css" />
+
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <style>
+      /* KHÔNG động vào nav / body để giữ giống main */
+
+      /* Vùng tổng Archive */
+      .archive-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      .archive {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow-y: auto;
+      }
+
+      .archive-inner {
+        width: 100%;
+        min-height: 100%;
+        padding-top: 8rem; /* chừa khoảng cho nav fixed (giống khoảng header ở index) */
+        padding-inline: 1.5rem;
+        padding-bottom: 4rem;
+      }
+
+      /* Overlay tối hơn ở giữa – không còn đỏ */
+      .overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.6) 50%,   /* từ 0.85 giảm còn 0.6 cho sáng hơn */
+    rgba(0, 0, 0, 1) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+      .row {
+        width: 100%;
+        height: 100px;
+        display: flex;
+      }
+
+      .archive-item {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+  position: relative;         /* thêm dòng này */
+}
+
+/* Trạng thái mặc định: mờ mờ */
+#archive-name,
+#archive-category {
+  opacity: 0.25;
+  transition: color 0.3s ease, opacity 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Item đang ở giữa màn hình: làm rõ lên */
+.archive-item.is-active {
+  z-index: 10;                /* NỔI LÊN TRÊN overlay */
+}
+
+.archive-item.is-active #archive-name,
+.archive-item.is-active #archive-category {
+  opacity: 1;
+  color: #ffffff;
+  text-shadow: 0 0 14px rgba(0, 0, 0, 1);
+  font-weight: 600;
+}
+      .archive-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        gap: 1rem;
+      }
+
+      #archive-name {
+        font-family: "PP Mondwest", apple-system, sans-serif;
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: rgba(255, 255, 255, 0.25);
+        transition: color 0.2s linear;
+      }
+
+      #archive-category {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        text-align: right;
+        color: rgba(255, 255, 255, 0.22);
+        transition: color 0.2s linear;
+      }
+
+      @media (max-width: 900px) {
+        .row {
+          height: 80px;
+        }
+
+        #archive-name {
+          font-size: 1rem;
+        }
+
+        #archive-category {
+          font-size: 0.7rem;
+          letter-spacing: 0.12em;
+        }
+      }
+
+      /* Trạng thái mặc định: mờ mờ */
+      #archive-name,
+      #archive-category {
+        opacity: 0.25;
+        transition: color 0.3s ease, opacity 0.3s ease, text-shadow 0.3s ease;
+      }
+
+      /* Item đang ở giữa màn hình: làm rõ lên */
+      .archive-item.is-active #archive-name,
+      .archive-item.is-active #archive-category {
+        opacity: 1;
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+      }
+
+      /* Preview khung ở giữa – dùng lại logic Preview.css */
+      .archive-preview {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 35%;
+        height: 40%;
+        border-radius: 0.5em;
+        overflow: hidden;
+        z-index: 100;
+      }
+
+      .archive-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      footer#light {
+        z-index: 300;
+        position: absolute;
+      }
+
+      @media (max-width: 900px) {
+        .archive-preview {
+          width: 75%;
+          height: 35%;
+          opacity: 0.75;
+          z-index: -1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- GIỐNG CẤU TRÚC ABOUT: container + nav id="light" -->
+    <div class="container" id="dark">
+      <!-- nav -->
+      <nav id="light">
+        <div class="nav-logo">
+          <div class="nav-link">
+            <a href="index.html">
+              <img
+                src="images/logo_red.png"
+                alt="H Logo"
+                class="nav-logo-img"
+              />
+            </a>
+          </div>
+        </div>
+        <div class="nav-links">
+          <div class="nav-link">
+            <a href="#">Contact</a>
+          </div>
+          <div class="nav-link">
+            <a href="archive.html">Case Studies</a>
+          </div>
+          <div class="nav-link">
+            <a href="about.html">About</a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Vùng Archive -->
+      <div class="archive-wrapper">
+        <div class="overlay"></div>
+
+        <div class="archive" id="archive-scroller">
+          <!-- Preview giữa màn hình -->
+          <div class="archive-preview">
+            <img
+              id="preview-img"
+              src="assets/archive/img1.jpg"
+              alt="preview"
+            />
+          </div>
+
+          <!-- List archive -->
+          <div class="archive-inner" id="archive-container"></div>
+        </div>
+      </div>
+
+      <!-- footer giống about/index -->
+      <footer id="light">
+        <div class="footer-col">
+          <p>Current</p>
+          <p>Seoultech Uni</p>
+          <p>Visual Design Dept.</p>
+        </div>
+        <div class="footer-col">
+          <p>Previously</p>
+          <p>Seoil Uni</p>
+          <p>Communication Design Dept.</p>
+        </div>
+        <div class="footer-col">
+          <p>Gwangjin</p>
+          <p>SMC, Seoul</p>
+          <p>South Korea</p>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      /* ===== DATA giống Archive.jsx ===== */
+      const archives = [
+        { name: "AnSang Soo Designer", category: "Print Design" },
+        { name: "Lost Horizons", category: "Concept Art" },
+        { name: "Eternal Echoes", category: "Typography" },
+        { name: "Abstract Dimensions", category: "Experimental Media" },
+        { name: "Silent Stories", category: "Photography" },
+        { name: "Fading Memories", category: "Editorial Design" },
+        { name: "Echo Chamber", category: "UX/UI Design" },
+        { name: "Shattered Glass", category: "Art Installations" },
+        { name: "Timeless Essence", category: "Brand Strategy" },
+        { name: "Parallel Worlds", category: "UX/UI Design" },
+        { name: "Invisible Threads", category: "Fashion Styling" },
+        { name: "Beyond the Surface", category: "Augmented Reality" }
+      ];
+
+      const archiveList = [];
+      for (let i = 0; i < 120; i++) {
+        archives.forEach((a) => archiveList.push({ ...a }));
+      }
+
+      const container = document.getElementById("archive-container");
+
+      archiveList.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const wrap = document.createElement("div");
+        wrap.className = "archive-item";
+
+        const box = document.createElement("div");
+        box.className = "archive-details";
+
+        const name = document.createElement("h1");
+        name.id = "archive-name";
+        name.textContent = item.name;
+
+        const cat = document.createElement("p");
+        cat.id = "archive-category";
+        cat.textContent = item.category;
+
+        box.appendChild(name);
+        box.appendChild(cat);
+        wrap.appendChild(box);
+        row.appendChild(wrap);
+        container.appendChild(row);
+      });
+
+      /* ===== Preview đổi ảnh + tick sound ===== */
+      const previewImgs = Array.from({ length: 30 }, (_, i) =>
+        `assets/archive/img${i + 1}.jpg`
+      );
+      const tick = new Audio("assets/sfx/tick.wav");
+      const previewImgTag = document.getElementById("preview-img");
+      let lastIndex = 0;
+      const buffer = 100;
+
+      document
+        .getElementById("archive-scroller")
+        .addEventListener("scroll", (e) => {
+          const pos = e.target.scrollTop;
+          const index = Math.floor(pos / buffer) % previewImgs.length;
+          if (index === lastIndex) return;
+          lastIndex = index;
+          previewImgTag.src = previewImgs[index];
+          tick.currentTime = 0;
+          tick.play().catch(() => {});
+        });
+
+      /* ===== GSAP infinite scroll + fade + highlight center ===== */
+      gsap.registerPlugin(ScrollTrigger);
+
+      window.onload = () => {
+        const scroller = document.getElementById("archive-scroller");
+
+        // Infinite scroll
+        ScrollTrigger.create({
+          scroller,
+          start: 0,
+          end: "max",
+          onLeave: (self) => {
+            self.scroll(1);
+            ScrollTrigger.update();
+          },
+          onLeaveBack: (self) => {
+            self.scroll(ScrollTrigger.maxScroll(scroller) - 1);
+            ScrollTrigger.update();
+          }
+        });
+
+        // Fade rows + highlight item ở giữa màn hình
+        document.querySelectorAll(".archive-item").forEach((item) => {
+          // chuyển động + opacity theo scroll
+          gsap.fromTo(
+            item,
+            { opacity: 0.3, y: 20 },
+            {
+              opacity: 1,
+              y: 0,
+              ease: "none",
+              scrollTrigger: {
+                scroller,
+                trigger: item,
+                start: "center bottom",
+                end: "center top",
+                scrub: true
+              }
+            }
+          );
+
+          // highlight item nằm đúng vùng giữa viewport
+          ScrollTrigger.create({
+            scroller,
+            trigger: item,
+            start: "center 55%", // vào vùng giữa
+            end: "center 45%",   // ra khỏi vùng giữa
+            toggleClass: { targets: item, className: "is-active" }
+          });
+        });
+      };
+    </script>
+  </body>
+</html>
